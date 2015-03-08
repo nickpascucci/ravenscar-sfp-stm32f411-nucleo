@@ -35,11 +35,11 @@
 	   VTOR register) defined in handler.S.  */
 	.section .vectors,"a"
 __vectors0:
-	.word   __stack_end /* stack top address */
-	.word   _start_rom  /* 1 Reset */
-	.word   hang        /* 2 NMI */
-	.word   hang        /* 3 HardFault */
-	.word   hang        /* 4 MemManage */
+	.word   __stack_end     /* stack top address */
+	.word   _start_rom      /* 1 Reset */
+	.word   hang_nmi        /* 2 NMI */
+	.word   hang_hardfault  /* 3 HardFault */
+	.word   hang_memmanage  /* 4 MemManage */
 
 	.text
 
@@ -97,4 +97,6 @@ __aeabi_unwind_cpp_pr1:
 __aeabi_unwind_cpp_pr2:
 __aeabi_ldiv0:
 __aeabi_idiv0:
-hang:   b .
+hang_nmi:   b .
+hang_hardfault:   b .
+hang_memmanage:   b .

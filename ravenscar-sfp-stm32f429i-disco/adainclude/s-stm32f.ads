@@ -31,10 +31,11 @@
 pragma Restrictions (No_Elaboration_Code);
 
 with System.Storage_Elements;
+with Interfaces;
 package System.STM32F4 is
 
    subtype Address is System.Address;
-   type Word is mod 2**32;
+   type Word is new Interfaces.Unsigned_32;
 
    type Bits_1 is mod 2**1 with Size => 1;
    type Bits_2 is mod 2**2 with Size => 2;

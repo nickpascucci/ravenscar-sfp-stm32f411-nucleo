@@ -54,14 +54,15 @@ procedure Setup_Pll is
    pragma Unreferenced (LSICLK);
 
    --  The following external clock could be changed, but note that the PLL
-   --  values have been calculated for a 168 MHz system clock from an external
+   --  values have been calculated for a 84 MHz system clock from an external
    --  8 MHz HSE clock. The PLL values are used when Activate_PLL is True.
 
    HSECLK          : constant HSECLK_Range := 8_000_000; -- ext. clock is 8 MHz
 
    HSE_Enabled     : constant Boolean := True;  -- use high-speed ext. clock
-   HSE_Bypass      : constant Boolean := False; -- don't bypass ext. resonator
+   HSE_Bypass      : constant Boolean := True;  -- bypass ext. resonator
    LSI_Enabled     : constant Boolean := True;  -- use low-speed internal clock
+   USART_Enabled   : constant Boolean := False;
 
    Activate_PLL    : constant Boolean := True;
    Activate_PLLI2S : constant Boolean := False;
@@ -78,12 +79,12 @@ procedure Setup_Pll is
 
    PLLM_Value  : constant := 8;     -- divider in range 2 .. 63
    PLLN_Value  : constant := 336;   -- multiplier in range 192 .. 432
-   PLLP_Value  : constant := 2;     -- divider may be 2, 4, 6 or 8
+   PLLP_Value  : constant := 4;     -- divider may be 2, 4, 6 or 8
    PLLQ_Value  : constant := 7;     -- multiplier in range 2 .. 15
 
    PLLCLKIN    : constant PLLIN_Range  := HSECLK / PLLM_Value;   --    1 MHz
    PLLVC0      : constant PLLVC0_Range := PLLCLKIN * PLLN_Value; --  336 MHz
-   PLLCLKOUT   : constant PLLOUT_Range := PLLVC0 / PLLP_Value;   --  168 MHz
+   PLLCLKOUT   : constant PLLOUT_Range := PLLVC0 / PLLP_Value;   --  84 MHz
 
    PLLM     : constant Word := PLLM_Value;
    PLLN     : constant Word := PLLN_Value * 2**6;
@@ -336,5 +337,7 @@ procedure Setup_Pll is
 begin
    Reset_Clocks;
    Initialize_Clocks;
-   Initialize_USART1 (115_200);
+   if USART_Enabled then
+      Initialize_USART1 (115_200);
+   end if;
 end Setup_Pll;

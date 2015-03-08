@@ -36,6 +36,7 @@ project Runtime_Build is
 
       for Switches ("C") use ALL_CFLAGS;
       for Switches ("Ada") use ALL_ADAFLAGS;
+      for Switches ("Asm_Cpp") use ALL_CFLAGS;
 
       for Switches ("s-traceb.adb") use ALL_ADAFLAGS & ("-g")
         & NO_SIBLING_ADAFLAGS & ("-fno-inline-functions-called-once");

@@ -43,7 +43,7 @@ pragma Restrictions (No_Elaboration_Code);
 package System.BB.Parameters is
    pragma Pure;
 
-   Clock_Frequency : constant := 168_000_000;
+   Clock_Frequency : constant := 84_000_000;
 
    ----------------
    -- Interrupts --
