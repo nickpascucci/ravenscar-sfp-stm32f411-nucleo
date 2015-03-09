@@ -55,11 +55,57 @@ package System.STM32F4 is
    AHB1_Peripheral_Base : constant := Peripheral_Base + 16#0002_0000#;
    AHB2_Peripheral_Base : constant := Peripheral_Base + 16#1000_0000#;
 
-   GPIOA_Base  : constant := AHB1_Peripheral_Base + 16#0000#;
-   FLASH_Base  : constant := AHB1_Peripheral_Base + 16#3C00#;
+   USB_OTG_FS_Base : constant := AHB2_Peripheral_Base + 16#0000#;
+
+   DMA2_Base  : constant := AHB1_Peripheral_Base + 16#6400#;
+   DMA1_Base  : constant := AHB1_Peripheral_Base + 16#6000#;
+   FLASH_Base : constant := AHB1_Peripheral_Base + 16#3C00#;
+   RCC_Base   : constant := AHB1_Peripheral_Base + 16#3800#;
+   CRC_Base   : constant := AHB1_Peripheral_Base + 16#3000#;
+   GPIOH_Base : constant := AHB1_Peripheral_Base + 16#1C00#;
+   GPIOE_Base : constant := AHB1_Peripheral_Base + 16#1000#;
+   GPIOD_Base : constant := AHB1_Peripheral_Base + 16#0C00#;
+   GPIOC_Base : constant := AHB1_Peripheral_Base + 16#0800#;
+   GPIOB_Base : constant := AHB1_Peripheral_Base + 16#0400#;
+   GPIOA_Base : constant := AHB1_Peripheral_Base + 16#0000#;
+
+   --  The SPI/I2S registers share the same location, but have different
+   --  purposes depending on enabled peripherals.
+   SPI5_Base   : constant := APB2_Peripheral_Base + 16#5000#;
+   I2S5_Base   : constant := APB2_Peripheral_Base + 16#5000#;
+   TIM11_Base  : constant := APB2_Peripheral_Base + 16#4800#;
+   TIM10_Base  : constant := APB2_Peripheral_Base + 16#4400#;
+   TIM9_Base   : constant := APB2_Peripheral_Base + 16#4000#;
+   EXTI_Base   : constant := APB2_Peripheral_Base + 16#3C00#;
+   SYSCFG_Base : constant := APB2_Peripheral_Base + 16#3800#;
+   SPI4_Base   : constant := APB2_Peripheral_Base + 16#3400#;
+   I2S4_Base   : constant := APB2_Peripheral_Base + 16#3400#;
+   SPI1_Base   : constant := APB2_Peripheral_Base + 16#3000#;
+   I2S1_Base   : constant := APB2_Peripheral_Base + 16#3000#;
+   SDIO_Base   : constant := APB2_Peripheral_Base + 16#2C00#;
+   ADC1_Base   : constant := APB2_Peripheral_Base + 16#2000#;
+   USART6_Base : constant := APB2_Peripheral_Base + 16#1400#;
    USART1_Base : constant := APB2_Peripheral_Base + 16#1000#;
-   RCC_Base    : constant := AHB1_Peripheral_Base + 16#3800#;
-   PWR_Base    : constant := APB1_Peripheral_Base + 16#7000#;
+   TIM1_Base   : constant := APB2_Peripheral_Base + 16#0000#;
+
+   PWR_Base     : constant := APB1_Peripheral_Base + 16#7000#;
+   I2C3_Base    : constant := APB1_Peripheral_Base + 16#5C00#;
+   I2C2_Base    : constant := APB1_Peripheral_Base + 16#5800#;
+   I2C1_Base    : constant := APB1_Peripheral_Base + 16#5400#;
+   USART2_Base  : constant := APB1_Peripheral_Base + 16#4400#;
+   I2S3ext_Base : constant := APB1_Peripheral_Base + 16#4000#;
+   SPI3_Base    : constant := APB1_Peripheral_Base + 16#3C00#;
+   I2S3_Base    : constant := APB1_Peripheral_Base + 16#3C00#;
+   SPI2_Base    : constant := APB1_Peripheral_Base + 16#3800#;
+   I2S2_Base    : constant := APB1_Peripheral_Base + 16#3800#;
+   I2S2ext_Base : constant := APB1_Peripheral_Base + 16#3400#;
+   IWDG_Base    : constant := APB1_Peripheral_Base + 16#3000#;
+   WWDG_Base    : constant := APB1_Peripheral_Base + 16#2C00#;
+   RTC_Base     : constant := APB1_Peripheral_Base + 16#2800#;
+   TIM5_Base    : constant := APB1_Peripheral_Base + 16#0C00#;
+   TIM4_Base    : constant := APB1_Peripheral_Base + 16#0800#;
+   TIM3_Base    : constant := APB1_Peripheral_Base + 16#0400#;
+   TIM2_Base    : constant := APB1_Peripheral_Base + 16#0000#;
 
    ---------------------------------
    -- RCC Reset and Clock Control --
@@ -225,6 +271,52 @@ package System.STM32F4 is
 
    PWR_CSR_VOSRDY   : constant Word := 1 * 2**14; -- Regulator output ready
 
+   ------------
+   --  EXTI  --
+   ------------
+
+   type EXTI_Registers is record
+      IMR   : Bits_32x1;
+      EMR   : Bits_32x1;
+      RTSR  : Bits_32x1;
+      FTSR  : Bits_32x1;
+      SWIER : Bits_32x1;
+      PR    : Bits_32x1;
+   end record;
+
+   EXTI : EXTI_Registers with Volatile,
+     Address => System'To_Address (EXTI_Base);
+   pragma Import (Ada, EXTI);
+
+   ------------
+   --  SYSCFG  --
+   ------------
+
+   package SYSCFG_Constants is
+      PORTA : constant Bits_4 := 0;
+      PORTB : constant Bits_4 := 1;
+      PORTC : constant Bits_4 := 2;
+      PORTD : constant Bits_4 := 3;
+      PORTE : constant Bits_4 := 4;
+      PORTH : constant Bits_4 := 7;
+   end SYSCFG_Constants;
+
+   type SYSCFG_Registers is record
+      MEMRMP    : Bits_16x2; -- 00
+      PMC       : Bits_32x1; -- 04
+      EXTICR1   : Bits_8x4;  -- 08
+      EXTICR2   : Bits_8x4;  -- 0C
+      EXTICR3   : Bits_8x4;  -- 10
+      EXTICR4   : Bits_8x4;  -- 14
+      RESERVED1 : Bits_32x1; -- 18
+      RESERVED2 : Bits_32x1; -- 1C
+      CMPCR     : Bits_32x1; -- 20
+   end record;
+
+   SYSCFG : SYSCFG_Registers with Volatile,
+     Address => System'To_Address (SYSCFG_Base);
+   pragma Import (Ada, SYSCFG);
+
    ---------------
    -- FLASH_ACR --
    ---------------
@@ -319,6 +411,26 @@ package System.STM32F4 is
    GPIOA : GPIO_Registers with Volatile,
                                Address => System'To_Address (GPIOA_Base);
    pragma Import (Ada, GPIOA);
+
+   GPIOB : GPIO_Registers with Volatile,
+                               Address => System'To_Address (GPIOB_Base);
+   pragma Import (Ada, GPIOB);
+
+   GPIOC : GPIO_Registers with Volatile,
+                               Address => System'To_Address (GPIOC_Base);
+   pragma Import (Ada, GPIOC);
+
+   GPIOD : GPIO_Registers with Volatile,
+                               Address => System'To_Address (GPIOD_Base);
+   pragma Import (Ada, GPIOD);
+
+   GPIOE : GPIO_Registers with Volatile,
+                               Address => System'To_Address (GPIOE_Base);
+   pragma Import (Ada, GPIOE);
+
+   GPIOH : GPIO_Registers with Volatile,
+                               Address => System'To_Address (GPIOH_Base);
+   pragma Import (Ada, GPIOH);
 
    -----------
    -- USART --
