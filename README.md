@@ -1,4 +1,4 @@
-gnat-stm32f411-nucleo
+ravenscar-sfp-stm32f411-nucleo
 =====================
 
 Port of the Ada Ravenscar runtime library from STM32F429IDISCOVERY to
