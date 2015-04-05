@@ -1,3 +1,4 @@
 *.ali
 *.o
 *.a
+/ravenscar-sfp-stm32f411-nucleo/obj/

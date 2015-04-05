@@ -29,7 +29,7 @@ project Runtime_Build is
            CFLAGS := CFLAGS & ("-O0", "-g");
       end case;
       ALL_ADAFLAGS := ("-gnatpgn", "-nostdinc") & CFLAGS;
-      ALL_CFLAGS := ("-DIN_RTS", "-Dinhibit_libc") & CFLAGS;
+      ALL_CFLAGS := ("-DIN_RTS", "-Dinhibit_libc", "-lm") & CFLAGS;
 
       NO_SIBLING_ADAFLAGS := ("-fno-optimize-sibling-calls");
       NO_REORDER_ADAFLAGS := ("-fno-toplevel-reorder");
