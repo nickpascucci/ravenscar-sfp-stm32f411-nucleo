@@ -245,10 +245,12 @@ package System.STM32F4 is
    end RCC_CSR;
 
    --  Bit definitions for RCC APB1ENR register
+   RCC_APB1ENR_USART2   : constant Word := 16#0002_0000#;
    RCC_APB1ENR_PWR      : constant Word := 16#1000_0000#;
 
    --  Bit definitions for RCC APB2ENR register
    RCC_APB2ENR_USART1   : constant Word := 16#10#;
+   RCC_APB2ENR_USART6   : constant Word := 16#20#;
 
    --  Bit definitions for RCC AHB1ENR register
    RCC_AHB1ENR_GPIOA    : constant Word := 16#01#;
@@ -482,6 +484,18 @@ package System.STM32F4 is
       CR3_CTSE    : constant Bits_16 := 16#0200#;   -- CTS Enable
       CR3_CTSIE   : constant Bits_16 := 16#0400#;   -- CTS Interrupt Enable
       CR3_ONEBIT  : constant Bits_16 := 16#0800#;   -- One bit method enable
+
+      --  Bit definitions for USART SR register
+      SR_PE   : constant Bits_16 := 16#0001#; -- Parity error
+      SR_FE   : constant Bits_16 := 16#0002#; -- Framing error
+      SR_NF   : constant Bits_16 := 16#0004#; -- Noise detected flag
+      SR_ORE  : constant Bits_16 := 16#0008#; -- Overrun error
+      SR_IDLE : constant Bits_16 := 16#0010#; -- IDLE line detected
+      SR_RXNE : constant Bits_16 := 16#0020#; -- Read data register not empty
+      SR_TC   : constant Bits_16 := 16#0040#; -- Transmission complete
+      SR_TXE  : constant Bits_16 := 16#0080#; -- Transmit data register empty
+      SR_LBD  : constant Bits_16 := 16#0100#; -- LIN Break detection flag
+      SR_CTS  : constant Bits_16 := 16#0200#; -- CTS Flag
    end USART;
 
    type USART_Registers is record
@@ -503,5 +517,11 @@ package System.STM32F4 is
 
    USART1 : USART_Registers with Volatile,
                                  Address => System'To_Address (USART1_Base);
+
+   USART2 : USART_Registers with Volatile,
+                                 Address => System'To_Address (USART2_Base);
+
+   USART6 : USART_Registers with Volatile,
+                                 Address => System'To_Address (USART6_Base);
 
 end System.STM32F4;
