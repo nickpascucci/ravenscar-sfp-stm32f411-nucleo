@@ -393,6 +393,7 @@ package System.STM32F4 is
 
       --  AFL constants
       AF_USART1    : constant Bits_4 := 7;
+      AF_USART2    : constant Bits_4 := 7;
    end GPIO;
 
    type GPIO_Registers is record
