@@ -370,26 +370,54 @@ package System.STM32F4 is
    ----------
 
    package GPIO is
-      --  MODER constants
-      Mode_IN        : constant Bits_2 := 0;
-      Mode_OUT       : constant Bits_2 := 1;
-      Mode_AF        : constant Bits_2 := 2;
-      Mode_AN        : constant Bits_2 := 3;
+      type IO_Index is range 0 .. 15;
 
-      --  OTYPER constants
-      Type_PP       : constant Bits_1 := 0; -- Push/pull
-      Type_OD       : constant Bits_1 := 1; -- Open drain
+      --  MODER enum
+      type MODER is (Mode_IN, Mode_OUT, Mode_AF, Mode_AN)
+        with Size => Bits_2'Size;
+      for MODER use (Mode_IN => 0,
+                     Mode_OUT => 1,
+                     Mode_AF => 2,
+                     Mode_AN => 3);
 
-      --  OSPEEDR constants
-      Speed_4MHz    : constant Bits_2 := 0; -- Low speed
-      Speed_25MHz   : constant Bits_2 := 1; -- Medium speed
-      Speed_50MHz   : constant Bits_2 := 2; -- Fast speed
-      Speed_100MHz  : constant Bits_2 := 3; -- High speed on 30pF, 80MHz on 15
+      type MODER_IOs is array (IO_Index) of MODER
+        with Pack;
 
-      --  PUPDR constants
-      No_Pull       : constant Bits_2 := 0;
-      Pull_Up       : constant Bits_2 := 1;
-      Pull_Down     : constant Bits_2 := 2;
+      --  OTYPER enum
+      type OTYPER is (Type_PP, Type_OD) with Size => 1;
+      for OTYPER use (Type_PP => 0,
+                      Type_OD => 1);
+
+      type OTYPER_IOs is array (IO_Index) of OTYPER
+        with Pack;
+
+      --  OSPEEDR enum
+      type OSPEEDR is (Speed_4MHz, -- Low speed
+                       Speed_25MHz, -- Medium speed
+                       Speed_50MHz, -- Fast speed
+                       Speed_100MHz -- High speed on 30pF, 80MHz on 15
+                      )
+        with Size => Bits_2'Size;
+
+      for OSPEEDR use (Speed_4MHz => 0,
+                       Speed_25MHz => 1,
+                       Speed_50MHz => 2,
+                       Speed_100MHz => 3);
+
+      type OSPEEDR_IOs is array (IO_Index) of OSPEEDR
+        with Pack;
+
+      --  PUPDR enum
+      type PUPDR is (No_Pull, Pull_Up, Pull_Down)
+        with Size => Bits_2'Size;
+      for PUPDR use (No_Pull => 0,
+                     Pull_Up => 1,
+                     Pull_Down => 2);
+
+      type PUPDR_IOs is array (IO_Index) of PUPDR with Pack;
+
+      type Inputs is array (IO_Index) of Boolean with Pack;
+      type Outputs is array (IO_Index) of Boolean with Pack;
 
       --  AFL constants
       AF_USART1    : constant Bits_4 := 7;
@@ -397,22 +425,28 @@ package System.STM32F4 is
    end GPIO;
 
    type GPIO_Registers is record
-      MODER   : Bits_16x2;
-      OTYPER  : Bits_32x1;
-      OSPEEDR : Bits_16x2;
-      PUPDR   : Bits_16x2;
+      MODER   : GPIO.MODER_IOs := (others => GPIO.Mode_AN);
+      OTYPER  : GPIO.OTYPER_IOs := (others => GPIO.Type_PP);
+      RESERVED : Bits_16 := 16#0000#; -- Always 0
+      OSPEEDR : GPIO.OSPEEDR_IOs := (others => GPIO.Speed_4MHz);
+      PUPDR   : GPIO.PUPDR_IOs := (others => GPIO.No_Pull);
 
-      IDR     : Word;
-      ODR     : Word;
-      BSRR    : Word;
-      LCKR    : Word;
+      IDR     : GPIO.Inputs := (others => False);
+      RESERVED_IDR : Bits_16 := 12#0000#;
 
-      AFRL    : Bits_8x4;
-      AFRH    : Bits_8x4;
+      ODR     : GPIO.Outputs := (others => False);
+      RESERVED_ODR : Bits_16 := 16#0000#;
+
+      BSRR    : Word := 16#0000#;
+      LCKR    : Word := 16#0000#;
+
+      AFRL    : Bits_8x4 := (others => GPIO.AF_USART1);
+      AFRH    : Bits_8x4 := (others => GPIO.AF_USART1);
    end record;
 
-   GPIOA : GPIO_Registers with Volatile,
-                               Address => System'To_Address (GPIOA_Base);
+   GPIOA : GPIO_Registers
+     with Volatile, Address => System'To_Address (GPIOA_Base);
+
    pragma Import (Ada, GPIOA);
 
    GPIOB : GPIO_Registers with Volatile,
