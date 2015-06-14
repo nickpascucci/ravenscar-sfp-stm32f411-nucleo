@@ -419,6 +419,8 @@ package System.STM32F4 is
       type Inputs is array (IO_Index) of Boolean with Pack;
       type Outputs is array (IO_Index) of Boolean with Pack;
 
+      type LCKn is array (IO_Index) of Boolean with Pack;
+
       --  AFL constants
       AF_USART1    : constant Bits_4 := 7;
       AF_USART2    : constant Bits_4 := 7;
@@ -438,7 +440,9 @@ package System.STM32F4 is
       RESERVED_ODR : Bits_16 := 16#0000#;
 
       BSRR    : Word := 16#0000#;
-      LCKR    : Word := 16#0000#;
+
+      LCKR    : GPIO.LCKn := (others => False);
+      LCKK    : Boolean := False;
 
       AFRL    : Bits_8x4 := (others => GPIO.AF_USART1);
       AFRH    : Bits_8x4 := (others => GPIO.AF_USART1);
