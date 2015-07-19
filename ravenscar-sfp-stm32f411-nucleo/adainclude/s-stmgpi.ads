@@ -37,7 +37,7 @@ package System.STM32F4.GPIO is
                    Type_OD => 1);
 
    type OTYPER_IOs is array (IO_Index) of OTYPER
-     with Pack;
+     with Pack, Size => Bits_16'Size;
 
    --  OSPEEDR enum
    type OSPEEDR is (Speed_4MHz, -- Low speed
@@ -75,7 +75,7 @@ package System.STM32F4.GPIO is
 
    --  Register definition
    type GPIO_Register is record
-      MODER   : MODER_IOs := (others => GPIO.Mode_AN);
+      MODER   : MODER_IOs := (others => GPIO.Mode_IN);
       OTYPER  : OTYPER_IOs := (others => GPIO.Type_PP);
 
       OSPEEDR : OSPEEDR_IOs := (others => GPIO.Speed_4MHz);
@@ -92,21 +92,21 @@ package System.STM32F4.GPIO is
 
       AFRL    : Bits_8x4 := (others => GPIO.AF_USART1);
       AFRH    : Bits_8x4 := (others => GPIO.AF_USART1);
-   end record;
+   end record with Size => 10 * Word'Size;
 
    for GPIO_Register use
       record
          MODER at 0 range 0 .. 31;
-         OTYPER at 1 * Word'Size range 0 .. 15;
-         OSPEEDR at 2 * Word'Size range 0 .. 31;
-         PUPDR at 3 * Word'Size range 0 .. 31;
-         IDR at 4 * Word'Size range 0 .. 15;
-         ODR at 5 * Word'Size range 0 .. 15;
-         BSRR at 6 * Word'Size range 0 .. 31;
-         LCKR at 7 * Word'Size range 0 .. 15;
-         LCKK at 7 * Word'Size range 16 .. 16;
-         AFRL at 8 * Word'Size range 0 .. 31;
-         AFRH at 9 * Word'Size range 0 .. 31;
+         OTYPER at 1 * Offset_Size range 0 .. 15;
+         OSPEEDR at 2 * Offset_Size range 0 .. 31;
+         PUPDR at 3 * Offset_Size range 0 .. 31;
+         IDR at 4 * Offset_Size range 0 .. 15;
+         ODR at 5 * Offset_Size range 0 .. 15;
+         BSRR at 6 * Offset_Size range 0 .. 31;
+         LCKR at 7 * Offset_Size range 0 .. 15;
+         LCKK at 7 * Offset_Size range 16 .. 16;
+         AFRL at 8 * Offset_Size range 0 .. 31;
+         AFRH at 9 * Offset_Size range 0 .. 31;
       end record;
 
    GPIOA : GPIO_Register

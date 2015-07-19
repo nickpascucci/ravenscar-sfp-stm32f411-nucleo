@@ -37,12 +37,15 @@ package System.STM32F4 is
    subtype Address is System.Address;
    type Word is new Interfaces.Unsigned_32;
 
+   Offset_Size : constant := Word'Size / Storage_Unit;
+
    type Bits_1 is mod 2**1 with Size => 1;
    type Bits_2 is mod 2**2 with Size => 2;
    type Bits_3 is mod 2**3 with Size => 3;
    type Bits_4 is mod 2**4 with Size => 4;
    type Bits_5 is mod 2**5 with Size => 5;
    type Bits_16 is mod 2**16 with Size => 16;
+   type Bits_32 is mod 2**32 with Size => 32;
 
    type Bits_32x1 is array (0 .. 31) of Bits_1 with Pack, Size => 32;
    type Bits_16x2 is array (0 .. 15) of Bits_2 with Pack, Size => 32;
