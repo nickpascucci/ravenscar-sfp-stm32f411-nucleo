@@ -33,7 +33,7 @@ pragma Restrictions (No_Elaboration_Code);
 --  To be moved to s-textio, but needs clock info ???
 
 with System.STM32F4; use System.STM32F4;
-
+with System.STM32F4.GPIO;
 with System.STM32F4.Flash_Registers; use System.STM32F4.Flash_Registers;
 
 procedure Setup_Pll is
