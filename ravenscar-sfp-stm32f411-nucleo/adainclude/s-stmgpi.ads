@@ -77,15 +77,13 @@ package System.STM32F4.GPIO is
    type GPIO_Register is record
       MODER   : MODER_IOs := (others => GPIO.Mode_AN);
       OTYPER  : OTYPER_IOs := (others => GPIO.Type_PP);
-      RESERVED : Bits_16 := 16#0000#; -- Always 0
+
       OSPEEDR : OSPEEDR_IOs := (others => GPIO.Speed_4MHz);
       PUPDR   : PUPDR_IOs := (others => GPIO.No_Pull);
 
       IDR     : Inputs := (others => False);
-      RESERVED_IDR : Bits_16 := 12#0000#;
 
       ODR     : Outputs := (others => False);
-      RESERVED_ODR : Bits_16 := 16#0000#;
 
       BSRR    : Word := 16#0000#;
 
@@ -95,6 +93,21 @@ package System.STM32F4.GPIO is
       AFRL    : Bits_8x4 := (others => GPIO.AF_USART1);
       AFRH    : Bits_8x4 := (others => GPIO.AF_USART1);
    end record;
+
+   for GPIO_Register use
+      record
+         MODER at 0 range 0 .. 31;
+         OTYPER at 1 * Word'Size range 0 .. 15;
+         OSPEEDR at 2 * Word'Size range 0 .. 31;
+         PUPDR at 3 * Word'Size range 0 .. 31;
+         IDR at 4 * Word'Size range 0 .. 15;
+         ODR at 5 * Word'Size range 0 .. 15;
+         BSRR at 6 * Word'Size range 0 .. 31;
+         LCKR at 7 * Word'Size range 0 .. 15;
+         LCKK at 7 * Word'Size range 16 .. 16;
+         AFRL at 8 * Word'Size range 0 .. 31;
+         AFRH at 9 * Word'Size range 0 .. 31;
+      end record;
 
    GPIOA : GPIO_Register
      with Volatile, Address => System'To_Address (GPIOA_Base);
