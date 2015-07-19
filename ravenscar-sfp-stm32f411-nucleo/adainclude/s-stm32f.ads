@@ -39,12 +39,27 @@ package System.STM32F4 is
 
    type Bits_1 is mod 2**1 with Size => 1;
    type Bits_2 is mod 2**2 with Size => 2;
+   type Bits_3 is mod 2**3 with Size => 3;
    type Bits_4 is mod 2**4 with Size => 4;
+   type Bits_5 is mod 2**5 with Size => 5;
    type Bits_16 is mod 2**16 with Size => 16;
 
    type Bits_32x1 is array (0 .. 31) of Bits_1 with Pack, Size => 32;
    type Bits_16x2 is array (0 .. 15) of Bits_2 with Pack, Size => 32;
    type Bits_8x4 is array (0 ..  7) of Bits_4 with Pack, Size => 32;
+
+   type Padding_1 is mod 2**1 with Size => 1;
+   type Padding_2 is mod 2**2 with Size => 2;
+   type Padding_3 is mod 2**3 with Size => 3;
+   type Padding_4 is mod 2**4 with Size => 4;
+   type Padding_5 is mod 2**5 with Size => 5;
+   type Padding_6 is mod 2**6 with Size => 6;
+   type Padding_7 is mod 2**7 with Size => 7;
+   type Padding_8 is mod 2**8 with Size => 8;
+   type Padding_9 is mod 2**9 with Size => 9;
+   type Padding_10 is mod 2**10 with Size => 10;
+   type Padding_15 is mod 2**15 with Size => 15;
+   type Padding_32 is mod 2**32 with Size => 32;
 
    --  Define address bases for the various system components
 
@@ -59,7 +74,7 @@ package System.STM32F4 is
 
    DMA2_Base  : constant := AHB1_Peripheral_Base + 16#6400#;
    DMA1_Base  : constant := AHB1_Peripheral_Base + 16#6000#;
-   FLASH_Base : constant := AHB1_Peripheral_Base + 16#3C00#;
+
    RCC_Base   : constant := AHB1_Peripheral_Base + 16#3800#;
    CRC_Base   : constant := AHB1_Peripheral_Base + 16#3000#;
    GPIOH_Base : constant := AHB1_Peripheral_Base + 16#1C00#;
@@ -318,52 +333,6 @@ package System.STM32F4 is
    SYSCFG : SYSCFG_Registers with Volatile,
      Address => System'To_Address (SYSCFG_Base);
    pragma Import (Ada, SYSCFG);
-
-   ---------------
-   -- FLASH_ACR --
-   ---------------
-
-   package FLASH_ACR is
-
-      --  Constants for FLASH ACR register
-
-      --  Wait states
-      LATENCY_0WS  : constant Word := 16#0#;
-      LATENCY_1WS  : constant Word := 16#1#;
-      LATENCY_2WS  : constant Word := 16#2#;
-      LATENCY_3WS  : constant Word := 16#3#;
-      LATENCY_4WS  : constant Word := 16#4#;
-      LATENCY_5WS  : constant Word := 16#5#;
-      LATENCY_6WS  : constant Word := 16#6#;
-      LATENCY_7WS  : constant Word := 16#7#;
-      LATENCY_8WS  : constant Word := 16#8#;
-      LATENCY_9WS  : constant Word := 16#9#;
-      LATENCY_10WS : constant Word := 16#10#;
-      LATENCY_11WS : constant Word := 16#11#;
-      LATENCY_12WS : constant Word := 16#12#;
-      LATENCY_13WS : constant Word := 16#13#;
-      LATENCY_14WS : constant Word := 16#14#;
-      LATENCY_15WS : constant Word := 16#15#;
-
-      PRFTEN      : constant Word := 16#01_00#; -- Preftech enable
-      ICEN        : constant Word := 16#02_00#; -- Instruction cache enable
-      DCEN        : constant Word := 16#04_00#; -- Data cache enable
-      ICRST       : constant Word := 16#08_00#; -- Instruction cache reset
-      DCRST       : constant Word := 16#10_00#; -- Data cache reset
-   end FLASH_ACR;
-
-   type FLASH_Registers is record
-      ACR     : Word;
-      KEYR    : Word;
-      OPTKEYR : Word;
-      SR      : Word;
-      CR      : Word;
-      OPTCR   : Word;
-   end record;
-
-   FLASH : FLASH_Registers with Volatile,
-                                Address => System'To_Address (FLASH_Base);
-   pragma Import (Ada, FLASH);
 
    ----------
    -- GPIO --

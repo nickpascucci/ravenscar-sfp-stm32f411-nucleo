@@ -34,6 +34,8 @@ pragma Restrictions (No_Elaboration_Code);
 
 with System.STM32F4; use System.STM32F4;
 
+with System.STM32F4.Flash_Registers; use System.STM32F4.Flash_Registers;
+
 procedure Setup_Pll is
 
    subtype HSECLK_Range is Integer range   1_000_000 ..  50_000_000;
@@ -257,8 +259,10 @@ procedure Setup_Pll is
       --  With a 165 MHz SYSCLK, 5 wait states must be configured.
       --  See Table 11 in RM (DocID 018909 Rev 7 - p81).
 
-      FLASH.ACR := FLASH_ACR.LATENCY_5WS or FLASH_ACR.ICEN or FLASH_ACR.DCEN
-        or FLASH_ACR.PRFTEN;
+      Flash.ACR.Latencies := LATENCY_5WS;
+      Flash.ACR.ICEN := True;
+      Flash.ACR.DCEN := True;
+      Flash.ACR.PRFTEN := True;
 
       --  Configure derived clocks
 
@@ -311,7 +315,7 @@ procedure Setup_Pll is
    -----------------------
 
    procedure Initialize_USART1 (Baudrate : Positive) is
-      use GPIO;
+      use System.STM32F4.GPIO;
       APB_Clock    : constant Positive := PCLK2;
       Int_Divider  : constant Positive := (25 * APB_Clock) / (4 * Baudrate);
       Frac_Divider : constant Natural := Int_Divider rem 100;
