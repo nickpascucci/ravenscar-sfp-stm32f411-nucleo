@@ -259,7 +259,7 @@ procedure Setup_Pll is
       --  With a 165 MHz SYSCLK, 5 wait states must be configured.
       --  See Table 11 in RM (DocID 018909 Rev 7 - p81).
 
-      Flash.ACR.Latencies := LATENCY_5WS;
+      Flash.ACR.Latency := LATENCY_5WS;
       Flash.ACR.ICEN := True;
       Flash.ACR.DCEN := True;
       Flash.ACR.PRFTEN := True;

@@ -8,7 +8,7 @@ package System.STM32F4.Flash_Registers is
    FLASH_Base : constant := AHB1_Peripheral_Base + 16#3C00#;
 
    --  Wait states
-   type Latency is (LATENCY_0WS,
+   type Latencies is (LATENCY_0WS,
                     LATENCY_1WS,
                     LATENCY_2WS,
                     LATENCY_3WS,
@@ -26,7 +26,7 @@ package System.STM32F4.Flash_Registers is
                     LATENCY_15WS)
      with Size => 4;
 
-   for Latency use (
+   for Latencies use (
                     LATENCY_0WS => 0,
                     LATENCY_1WS => 1,
                     LATENCY_2WS => 2,
@@ -45,34 +45,45 @@ package System.STM32F4.Flash_Registers is
                     LATENCY_15WS => 15
                    );
 
-   type Padding_ACR is mod 2**19 with Size => 19;
-
    type Flash_ACR is record
-      Latencies : Latency;
-      RESERVED_4BITS : Bits_4;
-
+      Latency : Latencies;
       PRFTEN : Boolean; -- Prefetch enable
       ICEN : Boolean; -- Instruction cache enable
       DCEN : Boolean; -- Data cache enable
       ICRST : Boolean; -- Instruction cache reset
       DCRST : Boolean; -- Data cache reset
-
-      RESERVED_PADDING : Padding_ACR;
-   end record with Size => 32, Pack;
+   end record with Size => Bits_32'Size;
+   for Flash_ACR use
+      record
+         Latency at 0 range 0 .. 3;
+         PRFTEN at 0 range 8 .. 8;
+         ICEN at 0 range 9 .. 9;
+         DCEN at 0 range 10 .. 10;
+         ICRST at 0 range 11 .. 11;
+         DCRST at 0 range 12 .. 12;
+      end record;
 
    type Flash_SR is record
       EOP : Boolean;
       OPERR : Boolean;
-      RESERVED_2BITS : Bits_2;
       WRPERR : Boolean;
       PGAERR : Boolean;
       PGPERR : Boolean;
       PGSERR : Boolean;
       RDERR : Boolean;
-      RESERVED_7 : Padding_7;
       BSY : Boolean;
-      PADDED_15 : Padding_15;
-   end record with Size => 32, Pack;
+   end record with Size => Bits_32'Size;
+   for Flash_SR use
+      record
+         EOP at 0 range 0 .. 0;
+         OPERR at 0 range 1 .. 1;
+         WRPERR at 0 range 4 .. 4;
+         PGAERR at 0 range 5 .. 5;
+         PGPERR at 0 range 6 .. 6;
+         PGSERR at 0 range 7 .. 7;
+         RDERR at 0 range 8 .. 8;
+         BSY at 0 range 16 .. 16;
+      end record;
 
    type Sector_Number is (SECTOR_0, SECTOR_1, SECTOR_2, SECTOR_3, SECTOR_4,
                           SECTOR_5, SECTOR_6, SECTOR_7, USR_SPECIFIC_SECTOR,
@@ -105,16 +116,24 @@ package System.STM32F4.Flash_Registers is
       SER : Boolean;
       MER : Boolean;
       SNB : Sector_Number;
-      RESERVED : Boolean;
       PSIZE : Program_Size;
-      RESERVED_5_1 : Padding_5;
       STRT : Boolean;
-      RESERVED_7 : Padding_7;
       EOPIE : Boolean;
       ERRIE : Boolean;
-      RESERVED_5_2 : Padding_5;
       LOCK : Boolean;
-   end record with Size => 32, Pack;
+   end record with Size => 32;
+   for Flash_CR use
+      record
+         PG at 0 range 0 .. 0;
+         SER at 0 range 1 .. 1;
+         MER at 0 range 2 .. 2;
+         SNB at 0 range 3 .. 6;
+         PSIZE at 0 range 8 .. 9;
+         STRT at 0 range 16 .. 16;
+         EOPIE at 0 range 24 .. 24;
+         ERRIE at 0 range 25 .. 25;
+         LOCK at 0 range 31 .. 31;
+      end record;
 
    type FLASH_Register is record
       ACR     : Flash_ACR;
