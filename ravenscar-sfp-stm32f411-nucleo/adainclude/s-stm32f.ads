@@ -99,7 +99,6 @@ package System.STM32F4 is
    USART1_Base : constant := APB2_Peripheral_Base + 16#1000#;
    TIM1_Base   : constant := APB2_Peripheral_Base + 16#0000#;
 
-   PWR_Base     : constant := APB1_Peripheral_Base + 16#7000#;
    I2C3_Base    : constant := APB1_Peripheral_Base + 16#5C00#;
    I2C2_Base    : constant := APB1_Peripheral_Base + 16#5800#;
    I2C1_Base    : constant := APB1_Peripheral_Base + 16#5400#;
@@ -117,24 +116,6 @@ package System.STM32F4 is
    TIM4_Base    : constant := APB1_Peripheral_Base + 16#0800#;
    TIM3_Base    : constant := APB1_Peripheral_Base + 16#0400#;
    TIM2_Base    : constant := APB1_Peripheral_Base + 16#0000#;
-
-   ---------
-   -- PWR --
-   ---------
-
-   type PWR_Registers is record
-      CR    : Word; --  PWR power control register at 16#00#
-      CSR   : Word; --  PWR power control/status register at 16#04#
-   end record;
-
-   PWR : PWR_Registers with Volatile, Import,
-                            Address => System'To_Address (PWR_Base);
-
-   PWR_CR_VOS_SCALE_3 : constant Word := 1 * 2**14;
-   PWR_CR_VOS_SCALE_2 : constant Word := 2 * 2**14;
-   PWR_CR_VOS_SCALE_1 : constant Word := 3 * 2**14;
-
-   PWR_CSR_VOSRDY   : constant Word := 1 * 2**14; -- Regulator output ready
 
    ------------
    --  EXTI  --

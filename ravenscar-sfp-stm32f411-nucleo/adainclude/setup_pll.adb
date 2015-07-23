@@ -43,6 +43,9 @@ use System.STM32F4.Flash_Registers;
 with System.STM32F4.Reset_Clock_Control;
 use System.STM32F4.Reset_Clock_Control;
 
+with System.STM32F4.Power;
+use System.STM32F4.Power;
+
 procedure Setup_Pll is
 
    subtype HSECLK_Range is Integer range   1_000_000 ..  50_000_000;
@@ -145,10 +148,6 @@ procedure Setup_Pll is
      );
 
    --  Local Subprograms
-
-   function "and" (Left, Right : Word) return Boolean is
-     ((Left and Right) /= 0);
-
    procedure Initialize_USART1 (Baudrate : Positive);
    procedure Initialize_Clocks;
    procedure Reset_Clocks;
@@ -176,7 +175,7 @@ procedure Setup_Pll is
       --  See RM (DocID 018909 Rev 7 - p120).
 
       if Activate_PLL then
-         PWR.CR := PWR_CR_VOS_SCALE_1;
+         PWR.CR.Regulator_Voltage_Scale := SCALE_1;
       end if;
 
       --  Wait until voltage supply scaling has completed after PLL is on in
@@ -184,7 +183,7 @@ procedure Setup_Pll is
 
       if not Activate_PLL then
          loop
-            exit when PWR.CSR and PWR_CSR_VOSRDY;
+            exit when PWR.CSR.Regulator_Voltage_Scaling_Ready;
          end loop;
       end if;
 
@@ -262,7 +261,7 @@ procedure Setup_Pll is
       --  case of PLL use.
       if Activate_PLL then
          loop
-            exit when PWR.CSR and PWR_CSR_VOSRDY;
+            exit when PWR.CSR.Regulator_Voltage_Scaling_Ready;
          end loop;
       end if;
 
