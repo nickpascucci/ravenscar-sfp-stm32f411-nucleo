@@ -87,8 +87,6 @@ package System.STM32F4 is
    TIM11_Base  : constant := APB2_Peripheral_Base + 16#4800#;
    TIM10_Base  : constant := APB2_Peripheral_Base + 16#4400#;
    TIM9_Base   : constant := APB2_Peripheral_Base + 16#4000#;
-   EXTI_Base   : constant := APB2_Peripheral_Base + 16#3C00#;
-   SYSCFG_Base : constant := APB2_Peripheral_Base + 16#3800#;
    SPI4_Base   : constant := APB2_Peripheral_Base + 16#3400#;
    I2S4_Base   : constant := APB2_Peripheral_Base + 16#3400#;
    SPI1_Base   : constant := APB2_Peripheral_Base + 16#3000#;
@@ -116,52 +114,6 @@ package System.STM32F4 is
    TIM4_Base    : constant := APB1_Peripheral_Base + 16#0800#;
    TIM3_Base    : constant := APB1_Peripheral_Base + 16#0400#;
    TIM2_Base    : constant := APB1_Peripheral_Base + 16#0000#;
-
-   ------------
-   --  EXTI  --
-   ------------
-
-   type EXTI_Registers is record
-      IMR   : Bits_32x1;
-      EMR   : Bits_32x1;
-      RTSR  : Bits_32x1;
-      FTSR  : Bits_32x1;
-      SWIER : Bits_32x1;
-      PR    : Bits_32x1;
-   end record;
-
-   EXTI : EXTI_Registers with Volatile,
-     Address => System'To_Address (EXTI_Base);
-   pragma Import (Ada, EXTI);
-
-   ------------
-   --  SYSCFG  --
-   ------------
-
-   package SYSCFG_Constants is
-      PORTA : constant Bits_4 := 0;
-      PORTB : constant Bits_4 := 1;
-      PORTC : constant Bits_4 := 2;
-      PORTD : constant Bits_4 := 3;
-      PORTE : constant Bits_4 := 4;
-      PORTH : constant Bits_4 := 7;
-   end SYSCFG_Constants;
-
-   type SYSCFG_Registers is record
-      MEMRMP    : Bits_16x2; -- 00
-      PMC       : Bits_32x1; -- 04
-      EXTICR1   : Bits_8x4;  -- 08
-      EXTICR2   : Bits_8x4;  -- 0C
-      EXTICR3   : Bits_8x4;  -- 10
-      EXTICR4   : Bits_8x4;  -- 14
-      RESERVED1 : Bits_32x1; -- 18
-      RESERVED2 : Bits_32x1; -- 1C
-      CMPCR     : Bits_32x1; -- 20
-   end record;
-
-   SYSCFG : SYSCFG_Registers with Volatile,
-     Address => System'To_Address (SYSCFG_Base);
-   pragma Import (Ada, SYSCFG);
 
    -----------
    -- USART --
