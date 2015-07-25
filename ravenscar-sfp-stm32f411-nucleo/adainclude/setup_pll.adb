@@ -46,6 +46,9 @@ use System.STM32F4.Reset_Clock_Control;
 with System.STM32F4.Power;
 use System.STM32F4.Power;
 
+with System.STM32F4.USART;
+use System.STM32F4.USART;
+
 procedure Setup_Pll is
 
    subtype HSECLK_Range is Integer range   1_000_000 ..  50_000_000;
@@ -372,10 +375,11 @@ procedure Setup_Pll is
 
    procedure Initialize_USART1 (Baudrate : Positive) is
       use System.STM32F4.GPIO;
-      APB_Clock    : constant Positive := PCLK2;
-      Int_Divider  : constant Positive := (25 * APB_Clock) / (4 * Baudrate);
-      Frac_Divider : constant Natural := Int_Divider rem 100;
-      BRR          : Bits_16;
+--        APB_Clock    : constant Positive := PCLK2;
+      Int_Divider  : constant Mantissa
+        := Mantissa (PCLK2 / (8 * 2 * Baudrate));
+      Frac_Divider : constant Fraction
+        := Fraction (PCLK2 rem (8 * 2 * Baudrate));
    begin
       RCC.RCC_APB2ENR.USART1_Clock_Enable := True;
       RCC.RCC_AHB1ENR.GPIOA_clock_Enable := True;
@@ -385,13 +389,26 @@ procedure Setup_Pll is
       GPIOA.OTYPER  (9 .. 10) := (Type_PP,     Type_PP);
       GPIOA.PUPDR   (9 .. 10) := (Pull_Up,     Pull_Up);
       GPIOA.AFRH    (1 ..  2) := (AF_USART1,   AF_USART1);
-      BRR := (Bits_16 (Frac_Divider * 16) + 50) / 100 mod 16
-               or Bits_16 (Int_Divider / 100 * 16);
 
-      USART1.BRR := BRR;
-      USART1.CR1 := USART.CR1_UE or USART.CR1_RE or USART.CR1_TE;
-      USART1.CR2 := 0;
-      USART1.CR3 := 0;
+      USART1.BRR := Baud_Rate_Register'(DIV_Fraction => Frac_Divider,
+                                       DIV_Mantissa => Int_Divider);
+      --  Must be done in one time, bit to bit does not seem to work
+      USART1.CR1 := Control_Register_1'(Send_Break                      => False,
+                                        Receiver_WakeUp                 => False,
+                                        Receiver_Enable                 => True,
+                                        Transmitter_Enable              => True,
+                                        IDLE_Interrupt_Enable           => False,
+                                        RXNE_Interrupt_Enable           => True,
+                                        Transmission_Complete_Interrupt => False,
+                                        TXE_Interrupt_Enable            => False,
+                                        PE_Interrupt_Enable             => False,
+                                        Parity_Selection                => ODD,
+                                        Parity_Control_Enable           => False,
+                                        WakeUp_Method                   => IDLE_LINE,
+                                        Length                          => EIGHT_BITS,
+                                        USART_Enable                    => True,
+                                        Oversampling_Mode               => OVERSAMPLING_BY_8);
+
    end Initialize_USART1;
 
 begin

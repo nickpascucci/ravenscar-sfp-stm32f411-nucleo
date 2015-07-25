@@ -44,6 +44,8 @@ package System.STM32F4 is
    type Bits_3 is mod 2**3 with Size => 3;
    type Bits_4 is mod 2**4 with Size => 4;
    type Bits_5 is mod 2**5 with Size => 5;
+   type Bits_9 is mod 2**9 with Size => 9;
+   type Bits_12 is mod 2**12 with Size => 12;
    type Bits_16 is mod 2**16 with Size => 16;
    type Bits_32 is mod 2**32 with Size => 32;
 
@@ -93,14 +95,11 @@ package System.STM32F4 is
    I2S1_Base   : constant := APB2_Peripheral_Base + 16#3000#;
    SDIO_Base   : constant := APB2_Peripheral_Base + 16#2C00#;
    ADC1_Base   : constant := APB2_Peripheral_Base + 16#2000#;
-   USART6_Base : constant := APB2_Peripheral_Base + 16#1400#;
-   USART1_Base : constant := APB2_Peripheral_Base + 16#1000#;
    TIM1_Base   : constant := APB2_Peripheral_Base + 16#0000#;
 
    I2C3_Base    : constant := APB1_Peripheral_Base + 16#5C00#;
    I2C2_Base    : constant := APB1_Peripheral_Base + 16#5800#;
    I2C1_Base    : constant := APB1_Peripheral_Base + 16#5400#;
-   USART2_Base  : constant := APB1_Peripheral_Base + 16#4400#;
    I2S3ext_Base : constant := APB1_Peripheral_Base + 16#4000#;
    SPI3_Base    : constant := APB1_Peripheral_Base + 16#3C00#;
    I2S3_Base    : constant := APB1_Peripheral_Base + 16#3C00#;
@@ -119,7 +118,7 @@ package System.STM32F4 is
    -- USART --
    -----------
 
-   package USART is
+   package USARTo is
       --  Bit definitions for USART CR1 register
       CR1_SBK     : constant Bits_16 := 16#0001#;   -- Send Break
       CR1_RWU     : constant Bits_16 := 16#0002#;   -- Receiver Wakeup
@@ -177,32 +176,6 @@ package System.STM32F4 is
       SR_TXE  : constant Bits_16 := 16#0080#; -- Transmit data register empty
       SR_LBD  : constant Bits_16 := 16#0100#; -- LIN Break detection flag
       SR_CTS  : constant Bits_16 := 16#0200#; -- CTS Flag
-   end USART;
-
-   type USART_Registers is record
-      SR         : Bits_16; -- USART Status register
-      Reserved_0 : Bits_16;
-      DR         : Bits_16; -- USART Data register
-      Reserved_1 : Bits_16;
-      BRR        : Bits_16; -- USART Baud rate register
-      Reserved_2 : Bits_16;
-      CR1        : Bits_16; -- USART Control register 1
-      Reserved_3 : Bits_16;
-      CR2        : Bits_16; -- USART Control register 2
-      Reserved_4 : Bits_16;
-      CR3        : Bits_16; -- USART Control register 3
-      Reserved_5 : Bits_16;
-      GTPR       : Bits_16; -- USART Guard time and prescaler register
-      Reserved_6 : Bits_16;
-   end record;
-
-   USART1 : USART_Registers with Volatile,
-                                 Address => System'To_Address (USART1_Base);
-
-   USART2 : USART_Registers with Volatile,
-                                 Address => System'To_Address (USART2_Base);
-
-   USART6 : USART_Registers with Volatile,
-                                 Address => System'To_Address (USART6_Base);
+   end USARTo;
 
 end System.STM32F4;
