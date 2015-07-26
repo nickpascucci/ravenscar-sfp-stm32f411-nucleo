@@ -393,21 +393,23 @@ procedure Setup_Pll is
       USART1.BRR := Baud_Rate_Register'(DIV_Fraction => Frac_Divider,
                                        DIV_Mantissa => Int_Divider);
       --  Must be done in one time, bit to bit does not seem to work
-      USART1.CR1 := Control_Register_1'(Send_Break                      => False,
-                                        Receiver_WakeUp                 => False,
-                                        Receiver_Enable                 => True,
-                                        Transmitter_Enable              => True,
-                                        IDLE_Interrupt_Enable           => False,
-                                        RXNE_Interrupt_Enable           => True,
-                                        Transmission_Complete_Interrupt => False,
-                                        TXE_Interrupt_Enable            => False,
-                                        PE_Interrupt_Enable             => False,
-                                        Parity_Selection                => ODD,
-                                        Parity_Control_Enable           => False,
-                                        WakeUp_Method                   => IDLE_LINE,
-                                        Length                          => EIGHT_BITS,
-                                        USART_Enable                    => True,
-                                        Oversampling_Mode               => OVERSAMPLING_BY_8);
+      USART1.CR1 :=
+        Control_Register_1'
+          (Send_Break                      => False,
+           Receiver_WakeUp                 => False,
+           Receiver_Enable                 => True,
+           Transmitter_Enable              => True,
+           IDLE_Interrupt_Enable           => False,
+           RXNE_Interrupt_Enable           => True,
+           Transmission_Complete_Interrupt => False,
+           TXE_Interrupt_Enable            => False,
+           PE_Interrupt_Enable             => False,
+           Parity_Selection                => ODD,
+           Parity_Control_Enable           => False,
+           WakeUp_Method                   => IDLE_LINE,
+           Length                          => EIGHT_BITS,
+           USART_Enable                    => True,
+           Oversampling_Mode               => OVERSAMPLING_BY_8);
 
    end Initialize_USART1;
 
