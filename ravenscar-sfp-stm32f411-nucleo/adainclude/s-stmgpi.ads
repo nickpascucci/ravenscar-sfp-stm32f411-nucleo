@@ -97,7 +97,7 @@ package System.STM32F4.GPIO is
    type Inputs is array (IO_Index) of Boolean with Pack;
    type Outputs is array (IO_Index) of Boolean with Pack;
 
-   type LCKn is array (IO_Index) of Boolean with Pack;
+   type LCK is array (IO_Index) of Boolean with Pack;
 
    --  AFL constants
    AF_USART1    : constant Bits_4 := 7;
@@ -105,11 +105,11 @@ package System.STM32F4.GPIO is
 
    --  Register definition
    type GPIO_Register is record
-      MODER   : MODER_IOs := (others => GPIO.Mode_IN);
-      OTYPER  : OTYPER_IOs := (others => GPIO.Type_PP);
+      MODER   : MODER_IOs := (others => Mode_IN);
+      OTYPER  : OTYPER_IOs := (others => Type_PP);
 
-      OSPEEDR : OSPEEDR_IOs := (others => GPIO.Speed_4MHz);
-      PUPDR   : PUPDR_IOs := (others => GPIO.No_Pull);
+      OSPEEDR : OSPEEDR_IOs := (others => Speed_4MHz);
+      PUPDR   : PUPDR_IOs := (others => No_Pull);
 
       IDR     : Inputs := (others => False);
 
@@ -117,11 +117,11 @@ package System.STM32F4.GPIO is
 
       BSRR    : Word := 16#0000#;
 
-      LCKR    : LCKn := (others => False);
+      LCKR    : LCK := (others => False);
       LCKK    : Boolean := False;
 
-      AFRL    : Bits_8x4 := (others => GPIO.AF_USART1);
-      AFRH    : Bits_8x4 := (others => GPIO.AF_USART1);
+      AFRL    : Bits_8x4 := (others => AF_USART1);
+      AFRH    : Bits_8x4 := (others => AF_USART1);
    end record with Size => 10 * Word'Size;
 
    for GPIO_Register use

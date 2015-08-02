@@ -39,19 +39,24 @@ package System.STM32F4.External_Interrupts is
 
    --  Registers and types
    --
-   type Index is range 0 .. 22;
+   type Interrupt_Index is range 0 .. 22;
 
-   type Interrupt_Mask_Register is array (Index) of Boolean
+   type Interrupt_Mask_Register is array (Interrupt_Index) of Boolean
      with Pack;
-   type Event_Mask_Register is array (Index) of Boolean
+
+   type Event_Mask_Register is array (Interrupt_Index) of Boolean
      with Pack;
-   type Rising_Trigger_Selection_Register is array (Index) of Boolean
-     with Pack;
-   type Falling_Trigger_Selection_Register is array (Index) of Boolean
-     with Pack;
-   type Software_Interrupt_Event_Register is array (Index) of Boolean
-     with Pack;
-   type Pending_Register is array (Index) of Boolean
+
+   type Rising_Trigger_Selection_Register is
+     array (Interrupt_Index) of Boolean with Pack;
+
+   type Falling_Trigger_Selection_Register is
+     array (Interrupt_Index) of Boolean with Pack;
+
+   type Software_Interrupt_Event_Register is
+     array (Interrupt_Index) of Boolean with Pack;
+
+   type Pending_Register is array (Interrupt_Index) of Boolean
      with Pack;
 
    type EXTI_Registers is

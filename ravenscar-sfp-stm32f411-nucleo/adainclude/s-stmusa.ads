@@ -38,7 +38,7 @@ package System.STM32F4.USART is
 
    --  Constants
    USART1_Base : constant := APB2_Peripheral_Base + 16#1000#;
-   USART2_Base  : constant := APB1_Peripheral_Base + 16#4400#;
+   USART2_Base : constant := APB1_Peripheral_Base + 16#4400#;
    USART6_Base : constant := APB2_Peripheral_Base + 16#1400#;
 
    type Status_Register is

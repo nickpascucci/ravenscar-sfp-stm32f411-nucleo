@@ -64,9 +64,9 @@ package System.STM32F4.Power is
    type Control_Register is
       record
          Low_Power_Deepsleep : Boolean;
-         Power_Down_Deesleep : Boolean;
+         Power_Down_Deepsleep : Boolean;
          Clear_Wakeup_Flag : Boolean;
-         Clear_StandBy_Flag : Boolean;
+         Clear_Standby_Flag : Boolean;
          Power_Voltage_Detector_Enable : Boolean;
          Voltage_Threshold_Detection : Voltage_Threshold;
          Disable_Backup_Domain_Write_Protection : Boolean;
@@ -81,9 +81,9 @@ package System.STM32F4.Power is
    for Control_Register use
       record
          Low_Power_Deepsleep at 0 range 0 .. 0;
-         Power_Down_Deesleep at 0 range 1 .. 1;
+         Power_Down_Deepsleep at 0 range 1 .. 1;
          Clear_Wakeup_Flag at 0 range 2 .. 2;
-         Clear_StandBy_Flag at 0 range 3 .. 3;
+         Clear_Standby_Flag at 0 range 3 .. 3;
          Power_Voltage_Detector_Enable at 0 range 4 .. 4;
          Voltage_Threshold_Detection at 0 range 5 .. 7;
          Disable_Backup_Domain_Write_Protection at 0 range 8 .. 8;
@@ -98,21 +98,21 @@ package System.STM32F4.Power is
 
    type Control_Status_Register is
       record
-         WakeUp_Flag : Boolean;
-         StandBy_Flag : Boolean;
+         Wakeup_Flag : Boolean;
+         Standby_Flag : Boolean;
          PVD_Output : Boolean;
          Backup_Regulator_Ready : Boolean;
-         Enable_WakeUp_Pin : Boolean;
+         Enable_Wakeup_Pin : Boolean;
          Backup_Regulator_Enable : Boolean;
          Regulator_Voltage_Scaling_Ready : Boolean;
       end record with Size => 32;
    for Control_Status_Register use
       record
-         WakeUp_Flag at 0 range 0 .. 0;
-         StandBy_Flag at 0 range 1 .. 1;
+         Wakeup_Flag at 0 range 0 .. 0;
+         Standby_Flag at 0 range 1 .. 1;
          PVD_Output at 0 range 2 .. 2;
          Backup_Regulator_Ready at 0 range 3 .. 3;
-         Enable_WakeUp_Pin at 0 range 8 .. 8;
+         Enable_Wakeup_Pin at 0 range 8 .. 8;
          Backup_Regulator_Enable at 0 range 9 .. 9;
          Regulator_Voltage_Scaling_Ready at 0 range 14 .. 14;
       end record;
