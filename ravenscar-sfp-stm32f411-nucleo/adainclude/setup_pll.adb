@@ -95,16 +95,10 @@ procedure Setup_Pll is
    PLLM_Value  : constant := 8;     -- divider in range 2 .. 63
    PLLN_Value  : constant := 336;   -- multiplier in range 192 .. 432
    PLLP_Value  : constant := 4;     -- divider may be 2, 4, 6 or 8
---     PLLQ_Value  : constant := 7;     -- multiplier in range 2 .. 15
 
    PLLCLKIN    : constant PLLIN_Range  := HSECLK / PLLM_Value;   --    1 MHz
    PLLVC0      : constant PLLVC0_Range := PLLCLKIN * PLLN_Value; --  336 MHz
    PLLCLKOUT   : constant PLLOUT_Range := PLLVC0 / PLLP_Value;   --  84 MHz
-
---     PLLM     : constant Word := PLLM_Value;
---     PLLN     : constant Word := PLLN_Value * 2**6;
---     PLLP     : constant Word := (PLLP_Value / 2 - 1) * 2**16;
---     PLLQ     : constant Word := PLLQ_Value * 2**24;
 
    HPRE     : constant AHB_Clock_Division_Factor
      := RCC.RCC_CFGR.AHB_Prescaler_Factor;
@@ -116,20 +110,20 @@ procedure Setup_Pll is
    SW       : constant System_Clock :=
                 (if Activate_PLL then PLL else HSI);
 
-   SYSCLOCK   : constant SYSCLK_Range :=
+   SYSCLCK   : constant SYSCLK_Range :=
                 (if Activate_PLL then PLLCLKOUT else HSICLK);
 
    HCLK     : constant HCLK_Range :=
      (case HPRE is
-         when NOT_DIVIDED   => SYSCLOCK / 1,
-         when DIVIDED_BY_2   => SYSCLOCK / 2,
-         when DIVIDED_BY_4   => SYSCLOCK / 4,
-         when DIVIDED_BY_8   => SYSCLOCK / 8,
-         when DIVIDED_BY_16  => SYSCLOCK / 16,
-         when DIVIDED_BY_64  => SYSCLOCK / 64,
-         when DIVIDED_BY_128 => SYSCLOCK / 128,
-         when DIVIDED_BY_256 => SYSCLOCK / 256,
-         when DIVIDED_BY_512 => SYSCLOCK / 512
+         when NOT_DIVIDED   =>  SYSCLCK / 1,
+         when DIVIDED_BY_2   => SYSCLCK / 2,
+         when DIVIDED_BY_4   => SYSCLCK / 4,
+         when DIVIDED_BY_8   => SYSCLCK / 8,
+         when DIVIDED_BY_16  => SYSCLCK / 16,
+         when DIVIDED_BY_64  => SYSCLCK / 64,
+         when DIVIDED_BY_128 => SYSCLCK / 128,
+         when DIVIDED_BY_256 => SYSCLCK / 256,
+         when DIVIDED_BY_512 => SYSCLCK / 512
      );
 
    PCLK1    : constant PCLK1_Range :=
@@ -201,37 +195,29 @@ procedure Setup_Pll is
       end loop;
 
       --  Configure high-speed external clock, if enabled
-
-      if HSE_Enabled then
-         RCC.RCC_CR.HSE_Enable := True;
-         if HSE_Bypass then
-            RCC.RCC_CR.HSE_Bypass := True;
-         end if;
-
---  Can also be initialized as following
---           RCC.RCC_CR :=
---             Clock_Control_Register'
---               (PLLI2S_Ready_Flag      => RCC.RCC_CR.PLLI2S_Ready_Flag,
---                PLLI2S_Enable          => RCC.RCC_CR.PLLI2S_Enable,
---                PLL_Ready_Flag         => RCC.RCC_CR.PLL_Ready_Flag,
---                PLL_Enable             => RCC.RCC_CR.PLL_Enable,
---                Security_System_Enable => RCC.RCC_CR.Security_System_Enable,
---                HSE_Ready_Flag         => RCC.RCC_CR.HSE_Ready_Flag,
---                HSI_Calibration        => RCC.RCC_CR.HSI_Calibration,
---                HSI_Trim               => RCC.RCC_CR.HSI_Trim,
---                HSI_Ready_Flag         => RCC.RCC_CR.HSI_Ready_Flag,
---                HSI_Enable             => RCC.RCC_CR.HSI_Enable,
---                HSE_Enable => True,
---                HSE_Bypass => (if HSE_Bypass then
---                                      True
---                               else False));
---           RCC.CR := RCC.CR or RCC_CR.HSEON
---             or (if HSE_Bypass then RCC_CR.HSEBYP else 0);
-
-         loop
-            exit when RCC.RCC_CR.HSE_Ready_Flag;
-         end loop;
-      end if;
+      --  Must be done as an aggregate initialization or through a temporary
+      --  variable as there is a bug inside GCC when assigning a component of
+      --  a composite (see discussion http://tinyurl.com/o6mzr79
+      --  on comp.lang.ada)
+      RCC.RCC_CR :=
+        Clock_Control_Register'
+          (PLLI2S_Ready_Flag      => RCC.RCC_CR.PLLI2S_Ready_Flag,
+           PLLI2S_Enable          => RCC.RCC_CR.PLLI2S_Enable,
+           PLL_Ready_Flag         => RCC.RCC_CR.PLL_Ready_Flag,
+           PLL_Enable             => RCC.RCC_CR.PLL_Enable,
+           Security_System_Enable => RCC.RCC_CR.Security_System_Enable,
+           HSE_Ready_Flag         => RCC.RCC_CR.HSE_Ready_Flag,
+           HSI_Calibration        => RCC.RCC_CR.HSI_Calibration,
+           HSI_Trim               => RCC.RCC_CR.HSI_Trim,
+           HSI_Ready_Flag         => RCC.RCC_CR.HSI_Ready_Flag,
+           HSI_Enable             => RCC.RCC_CR.HSI_Enable,
+           HSE_Enable => True,
+           HSE_Bypass => (if HSE_Bypass then
+                                 True
+                          else False));
+      loop
+         exit when RCC.RCC_CR.HSE_Ready_Flag;
+      end loop;
 
       --  Configure low-speed internal clock if enabled
       if LSI_Enabled then
@@ -338,26 +324,20 @@ procedure Setup_Pll is
 
       --  Reset HSEON, CSSON and PLLON bits
       --  Reset HSE bypass bit
-      RCC.RCC_CR.HSE_Enable := False;
-      RCC.RCC_CR.Security_System_Enable := False;
-      RCC.RCC_CR.PLL_Enable := False;
-      RCC.RCC_CR.HSE_Bypass := False;
-
---       RCC.RCC_CR := Clock_Control_Register'(PLLI2S_Ready_Flag      => False,
---                                             PLLI2S_Enable          => False,
---                                             PLL_Ready_Flag         => False,
---                                             PLL_Enable             => False,
---                                             Security_System_Enable => False,
---                                             HSE_Bypass             => False,
---                                             HSE_Ready_Flag         => False,
---                                             HSE_Enable             => False,
---                                             HSI_Calibration        => 0,
---                                             HSI_Trim               => 0,
---                                             HSI_Ready_Flag         => False,
---                                             HSI_Enable             => True);
+      RCC.RCC_CR := Clock_Control_Register'(PLLI2S_Ready_Flag      => False,
+                                            PLLI2S_Enable          => False,
+                                            PLL_Ready_Flag         => False,
+                                            PLL_Enable             => False,
+                                            Security_System_Enable => False,
+                                            HSE_Bypass             => False,
+                                            HSE_Ready_Flag         => False,
+                                            HSE_Enable             => False,
+                                            HSI_Calibration        => 0,
+                                            HSI_Trim               => 0,
+                                            HSI_Ready_Flag         => False,
+                                            HSI_Enable             => True);
 
       --  Reset PLL configuration register
-      --  RCC.PLLCFGR := 16#2400_3010#;
       RCC.RCC_PLLCFGR :=
         PLL_Configuration_Register'(Division_Factor_For_Input      => 16,
                                     Multiplication_Factor_For_Main => 64,
@@ -375,7 +355,6 @@ procedure Setup_Pll is
 
    procedure Initialize_USART1 (Baudrate : Positive) is
       use System.STM32F4.GPIO;
---        APB_Clock    : constant Positive := PCLK2;
       Int_Divider  : constant Mantissa
         := Mantissa (PCLK2 / (8 * 2 * Baudrate));
       Frac_Divider : constant Fraction
