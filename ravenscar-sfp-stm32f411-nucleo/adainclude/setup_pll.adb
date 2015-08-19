@@ -32,7 +32,22 @@ pragma Restrictions (No_Elaboration_Code);
 --  all derived clocks. For now it also initializes the first USART.
 --  To be moved to s-textio, but needs clock info ???
 
-with System.STM32F4; use System.STM32F4;
+with System.STM32F4;
+use System.STM32F4;
+
+with System.STM32F4.GPIO;
+
+with System.STM32F4.Flash_Registers;
+use System.STM32F4.Flash_Registers;
+
+with System.STM32F4.Reset_Clock_Control;
+use System.STM32F4.Reset_Clock_Control;
+
+with System.STM32F4.Power;
+use System.STM32F4.Power;
+
+with System.STM32F4.USART;
+use System.STM32F4.USART;
 
 procedure Setup_Pll is
 
@@ -80,88 +95,59 @@ procedure Setup_Pll is
    PLLM_Value  : constant := 8;     -- divider in range 2 .. 63
    PLLN_Value  : constant := 336;   -- multiplier in range 192 .. 432
    PLLP_Value  : constant := 4;     -- divider may be 2, 4, 6 or 8
-   PLLQ_Value  : constant := 7;     -- multiplier in range 2 .. 15
 
    PLLCLKIN    : constant PLLIN_Range  := HSECLK / PLLM_Value;   --    1 MHz
    PLLVC0      : constant PLLVC0_Range := PLLCLKIN * PLLN_Value; --  336 MHz
    PLLCLKOUT   : constant PLLOUT_Range := PLLVC0 / PLLP_Value;   --  84 MHz
 
-   PLLM     : constant Word := PLLM_Value;
-   PLLN     : constant Word := PLLN_Value * 2**6;
-   PLLP     : constant Word := (PLLP_Value / 2 - 1) * 2**16;
-   PLLQ     : constant Word := PLLQ_Value * 2**24;
+   HPRE     : constant AHB_Clock_Division_Factor
+     := RCC.RCC_CFGR.AHB_Prescaler_Factor;
+   PPRE1    : constant APB_Clock_Division_Factor
+     := RCC.RCC_CFGR.APB_Low_Speed_Prescaler_Factor;
+   PPRE2    : constant APB_Clock_Division_Factor
+     := RCC.RCC_CFGR.APB_High_Speed_Prescaler_Factor;
 
-   HPRE     : constant Word := RCC_CFGR.HPRE_DIV1;
-   PPRE1    : constant Word := RCC_CFGR.PPRE1_DIV4;
-   PPRE2    : constant Word := RCC_CFGR.PPRE2_DIV2;
+   SW       : constant System_Clock :=
+                (if Activate_PLL then PLL else HSI);
 
-   SW       : constant Word :=
-                (if Activate_PLL then RCC_CFGR.SW_PLL else RCC_CFGR.SW_HSI);
-
-   SYSCLK   : constant SYSCLK_Range :=
+   SYSCLCK   : constant SYSCLK_Range :=
                 (if Activate_PLL then PLLCLKOUT else HSICLK);
 
    HCLK     : constant HCLK_Range :=
-                (case HPRE is
-                 when RCC_CFGR.HPRE_DIV1   => SYSCLK / 1,
-                 when RCC_CFGR.HPRE_DIV2   => SYSCLK / 2,
-                 when RCC_CFGR.HPRE_DIV4   => SYSCLK / 4,
-                 when RCC_CFGR.HPRE_DIV8   => SYSCLK / 8,
-                 when RCC_CFGR.HPRE_DIV16  => SYSCLK / 16,
-                 when RCC_CFGR.HPRE_DIV64  => SYSCLK / 64,
-                 when RCC_CFGR.HPRE_DIV128 => SYSCLK / 128,
-                 when RCC_CFGR.HPRE_DIV256 => SYSCLK / 256,
-                 when RCC_CFGR.HPRE_DIV512 => SYSCLK / 512,
-                 when others => raise Program_Error);
+     (case HPRE is
+         when NOT_DIVIDED   =>  SYSCLCK / 1,
+         when DIVIDED_BY_2   => SYSCLCK / 2,
+         when DIVIDED_BY_4   => SYSCLCK / 4,
+         when DIVIDED_BY_8   => SYSCLCK / 8,
+         when DIVIDED_BY_16  => SYSCLCK / 16,
+         when DIVIDED_BY_64  => SYSCLCK / 64,
+         when DIVIDED_BY_128 => SYSCLCK / 128,
+         when DIVIDED_BY_256 => SYSCLCK / 256,
+         when DIVIDED_BY_512 => SYSCLCK / 512
+     );
 
    PCLK1    : constant PCLK1_Range :=
                 (case PPRE1 is
-                 when RCC_CFGR.PPRE1_DIV1  => HCLK / 1,
-                 when RCC_CFGR.PPRE1_DIV2  => HCLK / 2,
-                 when RCC_CFGR.PPRE1_DIV4  => HCLK / 4,
-                 when RCC_CFGR.PPRE1_DIV8  => HCLK / 8,
-                 when RCC_CFGR.PPRE1_DIV16 => HCLK / 16,
-                 when others => raise Program_Error);
+                 when NOT_DIVIDED  => HCLK / 1,
+                 when DIVIDED_BY_2  => HCLK / 2,
+                 when DIVIDED_BY_4  => HCLK / 4,
+                 when DIVIDED_BY_8  => HCLK / 8,
+                 when DIVIDED_BY_16 => HCLK / 16);
    pragma Unreferenced (PCLK1);
 
    PCLK2    : constant PCLK2_Range :=
-                (case PPRE2 is
-                 when RCC_CFGR.PPRE2_DIV1  => HCLK / 1,
-                 when RCC_CFGR.PPRE2_DIV2  => HCLK / 2,
-                 when RCC_CFGR.PPRE2_DIV4  => HCLK / 4,
-                 when RCC_CFGR.PPRE2_DIV8  => HCLK / 8,
-                 when RCC_CFGR.PPRE2_DIV16 => HCLK / 16,
-                 when others => raise Program_Error);
+     (case PPRE2 is
+         when NOT_DIVIDED  => HCLK / 1,
+         when DIVIDED_BY_2  => HCLK / 2,
+         when DIVIDED_BY_4  => HCLK / 4,
+         when DIVIDED_BY_8  => HCLK / 8,
+         when DIVIDED_BY_16 => HCLK / 16
+     );
 
    --  Local Subprograms
-
-   function "and" (Left, Right : Word) return Boolean is
-     ((Left and Right) /= 0);
-
-   procedure Reset (Register : in out Word; Mask : Word);
-   procedure Set (Register : in out Word; Mask : Word);
-
    procedure Initialize_USART1 (Baudrate : Positive);
    procedure Initialize_Clocks;
    procedure Reset_Clocks;
-
-   -----------
-   -- Reset --
-   -----------
-
-   procedure Reset (Register : in out Word; Mask : Word) is
-   begin
-      Register := Register and not Mask;
-   end Reset;
-
-   ---------
-   -- Set --
-   ---------
-
-   procedure Set (Register : in out Word; Mask : Word) is
-   begin
-      Register := Register or Mask;
-   end Set;
 
    -----------------------
    -- Initialize_Clocks --
@@ -172,7 +158,7 @@ procedure Setup_Pll is
       --  PWR clock enable
       --  Reset the power interface
 
-      RCC.APB1ENR := RCC_APB1ENR_PWR;
+      RCC.RCC_APB1ENR.Power_Interface_Clock_Enable := True;
 
       --  PWR initialization
       --
@@ -186,7 +172,7 @@ procedure Setup_Pll is
       --  See RM (DocID 018909 Rev 7 - p120).
 
       if Activate_PLL then
-         PWR.CR := PWR_CR_VOS_SCALE_1;
+         PWR.CR.Regulator_Voltage_Scale := SCALE_1;
       end if;
 
       --  Wait until voltage supply scaling has completed after PLL is on in
@@ -194,7 +180,7 @@ procedure Setup_Pll is
 
       if not Activate_PLL then
          loop
-            exit when PWR.CSR and PWR_CSR_VOSRDY;
+            exit when PWR.CSR.Regulator_Voltage_Scaling_Ready;
          end loop;
       end if;
 
@@ -202,50 +188,69 @@ procedure Setup_Pll is
       --  The internal high speed clock is always enabled, because it is the
       --  fallback clock when the PLL fails.
 
-      RCC.CR := RCC.CR or RCC_CR.HSION;
+      RCC.RCC_CR.HSI_Enable := True;
 
       loop
-         exit when RCC.CR and RCC_CR.HSIRDY;
+         exit when RCC.RCC_CR.HSI_Ready_Flag;
       end loop;
 
       --  Configure high-speed external clock, if enabled
-
-      if HSE_Enabled then
-         RCC.CR := RCC.CR or RCC_CR.HSEON
-           or (if HSE_Bypass then RCC_CR.HSEBYP else 0);
-
-         loop
-            exit when RCC.CR and RCC_CR.HSERDY;
-         end loop;
-      end if;
+      --  Must be done as an aggregate initialization or through a temporary
+      --  variable as there is a bug inside GCC when assigning a component of
+      --  a composite (see discussion http://tinyurl.com/o6mzr79
+      --  on comp.lang.ada)
+      RCC.RCC_CR :=
+        Clock_Control_Register'
+          (PLLI2S_Ready_Flag      => RCC.RCC_CR.PLLI2S_Ready_Flag,
+           PLLI2S_Enable          => RCC.RCC_CR.PLLI2S_Enable,
+           PLL_Ready_Flag         => RCC.RCC_CR.PLL_Ready_Flag,
+           PLL_Enable             => RCC.RCC_CR.PLL_Enable,
+           Security_System_Enable => RCC.RCC_CR.Security_System_Enable,
+           HSE_Ready_Flag         => RCC.RCC_CR.HSE_Ready_Flag,
+           HSI_Calibration        => RCC.RCC_CR.HSI_Calibration,
+           HSI_Trim               => RCC.RCC_CR.HSI_Trim,
+           HSI_Ready_Flag         => RCC.RCC_CR.HSI_Ready_Flag,
+           HSI_Enable             => RCC.RCC_CR.HSI_Enable,
+           HSE_Enable => True,
+           HSE_Bypass => (if HSE_Bypass then
+                                 True
+                          else False));
+      loop
+         exit when RCC.RCC_CR.HSE_Ready_Flag;
+      end loop;
 
       --  Configure low-speed internal clock if enabled
-
       if LSI_Enabled then
-         RCC.CSR := RCC.CSR or RCC_CSR.LSION;
+         RCC.RCC_CSR.Internal_Low_Speed_Enable := True;
 
          loop
-            exit when RCC.CSR and RCC_CSR.LSIRDY;
+            exit when RCC.RCC_CSR.Internal_Low_Speed_Ready;
          end loop;
       end if;
 
       --  Activate PLL if enabled
 
       if Activate_PLL then
-         RCC.PLLCFGR := PLLQ or PLLSRC_HSE or PLLP or PLLN or PLLM;
-         Set (RCC.CR, RCC_CR.PLLON);
+         RCC.RCC_PLLCFGR :=
+           PLL_Configuration_Register'
+             (Division_Factor_For_Input      => 8,
+              Multiplication_Factor_For_Main => 336,
+              Division_Factor_For_Main       => PLLP_4,
+              Clock_Source                   => HSE,
+              Division_Factor_For_USB        => 7);
+
+         RCC.RCC_CR.PLL_Enable := True;
 
          loop
-            exit when RCC.CR and RCC_CR.PLLRDY;
+            exit when RCC.RCC_CR.PLL_Ready_Flag;
          end loop;
       end if;
 
       --  Wait until voltage supply scaling has completed after PLL is on in
       --  case of PLL use.
-
       if Activate_PLL then
          loop
-            exit when PWR.CSR and PWR_CSR_VOSRDY;
+            exit when PWR.CSR.Regulator_Voltage_Scaling_Ready;
          end loop;
       end if;
 
@@ -257,25 +262,37 @@ procedure Setup_Pll is
       --  With a 165 MHz SYSCLK, 5 wait states must be configured.
       --  See Table 11 in RM (DocID 018909 Rev 7 - p81).
 
-      FLASH.ACR := FLASH_ACR.LATENCY_5WS or FLASH_ACR.ICEN or FLASH_ACR.DCEN
-        or FLASH_ACR.PRFTEN;
+      Flash.ACR.Latency := LATENCY_5WS;
+      Flash.ACR.ICEN := True;
+      Flash.ACR.DCEN := True;
+      Flash.ACR.PRFTEN := True;
 
       --  Configure derived clocks
+      --  AHB prescaler is 1, APB1 uses 4 and APB2 prescaler is 2
+      --  Configure MC01 pin to have the HSI (high speed internal clock)
+      --  Configure MCO2 pin to have SYSCLK / 5
+      --  Select system clock source
+      --  SW;
 
-      RCC.CFGR :=
-        --  AHB prescaler is 1, APB1 uses 4 and APB2 prescaler is 2
-        HPRE or PPRE1 or PPRE2 or
-        --  Configure MC01 pin to have the HSI (high speed internal clock)
-        RCC_CFGR.MCO1PRE_DIV1 or RCC_CFGR.MCO1SEL_HSI or
-        --  Configure MCO2 pin to have SYSCLK / 5
-        RCC_CFGR.MCO2PRE_DIV5 or RCC_CFGR.MCO2SEL_SYSCLK or
-        --  Select system clock source
-        SW;
+      RCC.RCC_CFGR :=
+        Clock_Configuration_Register'
+          (System_Clock_Switch             => SW,
+           System_Clock_Status             => RCC.RCC_CFGR.System_Clock_Status,
+           AHB_Prescaler_Factor            => NOT_DIVIDED,
+           APB_Low_Speed_Prescaler_Factor  => DIVIDED_BY_4,
+           APB_High_Speed_Prescaler_Factor => DIVIDED_BY_2,
+           HSE_Division_Factor             => 0,
+           Microcontroller_Clock_Output_1  => HSI,
+           I2S_Clock                       => RCC.RCC_CFGR.I2S_Clock,
+           MCO1_Prescaler                  => NOT_DIVIDED,
+           MCO2_Prescaler                  => DIVIDED_BY_5,
+           Microcontroller_Clock_Output_2  => SYSCLK);
 
       if Activate_PLL then
          loop
-            exit when (RCC.CFGR and (RCC_CFGR.SWS_HSE or RCC_CFGR.SWS_PLL))
-              = RCC_CFGR.SWS_PLL;
+            exit when
+              RCC.RCC_CFGR.System_Clock_Status
+                = RCC.RCC_CFGR.System_Clock_Switch;
          end loop;
       end if;
 
@@ -288,22 +305,48 @@ procedure Setup_Pll is
    procedure Reset_Clocks is
    begin
       --  Switch on high speed internal clock
-      Set (RCC.CR, RCC_CR.HSION);
+      RCC.RCC_CR.HSI_Enable := True;
 
       --  Reset CFGR regiser
-      RCC.CFGR := 0;
+      RCC.RCC_CFGR :=
+        Clock_Configuration_Register'
+          (System_Clock_Switch             => HSI,
+           System_Clock_Status             => HSI,
+           AHB_Prescaler_Factor            => NOT_DIVIDED,
+           APB_Low_Speed_Prescaler_Factor  => NOT_DIVIDED,
+           APB_High_Speed_Prescaler_Factor => NOT_DIVIDED,
+           HSE_Division_Factor             => 0,
+           Microcontroller_Clock_Output_1  => HSI,
+           I2S_Clock                       => PLLI2S,
+           MCO1_Prescaler                  => NOT_DIVIDED,
+           MCO2_Prescaler                  => NOT_DIVIDED,
+           Microcontroller_Clock_Output_2  => Reset_Clock_Control.SYSCLK);
 
       --  Reset HSEON, CSSON and PLLON bits
-      Reset (RCC.CR, RCC_CR.HSEON or RCC_CR.CSSON or RCC_CR.PLLON);
+      --  Reset HSE bypass bit
+      RCC.RCC_CR := Clock_Control_Register'(PLLI2S_Ready_Flag      => False,
+                                            PLLI2S_Enable          => False,
+                                            PLL_Ready_Flag         => False,
+                                            PLL_Enable             => False,
+                                            Security_System_Enable => False,
+                                            HSE_Bypass             => False,
+                                            HSE_Ready_Flag         => False,
+                                            HSE_Enable             => False,
+                                            HSI_Calibration        => 0,
+                                            HSI_Trim               => 0,
+                                            HSI_Ready_Flag         => False,
+                                            HSI_Enable             => True);
 
       --  Reset PLL configuration register
-      RCC.PLLCFGR := 16#2400_3010#;
-
-      --  Reset HSE bypass bit
-      Reset (RCC.CR, RCC_CR.HSEBYP);
+      RCC.RCC_PLLCFGR :=
+        PLL_Configuration_Register'(Division_Factor_For_Input      => 16,
+                                    Multiplication_Factor_For_Main => 64,
+                                    Division_Factor_For_Main       => PLLP_6,
+                                    Clock_Source                   => HSI,
+                                    Division_Factor_For_USB        => 4);
 
       --  Disable all interrupts
-      RCC.CIR := 0;
+      RCC.RCC_CIR := (others => False);
    end Reset_Clocks;
 
    -----------------------
@@ -311,27 +354,42 @@ procedure Setup_Pll is
    -----------------------
 
    procedure Initialize_USART1 (Baudrate : Positive) is
-      use GPIO;
-      APB_Clock    : constant Positive := PCLK2;
-      Int_Divider  : constant Positive := (25 * APB_Clock) / (4 * Baudrate);
-      Frac_Divider : constant Natural := Int_Divider rem 100;
-      BRR          : Bits_16;
+      use System.STM32F4.GPIO;
+      Int_Divider  : constant Mantissa
+        := Mantissa (PCLK2 / (8 * 2 * Baudrate));
+      Frac_Divider : constant Fraction
+        := Fraction (PCLK2 rem (8 * 2 * Baudrate));
    begin
-      RCC.APB2ENR := RCC.APB2ENR or RCC_APB2ENR_USART1;
-      RCC.AHB1ENR := RCC.AHB1ENR or RCC_AHB1ENR_GPIOA;
+      RCC.RCC_APB2ENR.USART1_Clock_Enable := True;
+      RCC.RCC_AHB1ENR.GPIOA_clock_Enable := True;
 
       GPIOA.MODER   (9 .. 10) := (Mode_AF,     Mode_AF);
       GPIOA.OSPEEDR (9 .. 10) := (Speed_50MHz, Speed_50MHz);
       GPIOA.OTYPER  (9 .. 10) := (Type_PP,     Type_PP);
       GPIOA.PUPDR   (9 .. 10) := (Pull_Up,     Pull_Up);
       GPIOA.AFRH    (1 ..  2) := (AF_USART1,   AF_USART1);
-      BRR := (Bits_16 (Frac_Divider * 16) + 50) / 100 mod 16
-               or Bits_16 (Int_Divider / 100 * 16);
 
-      USART1.BRR := BRR;
-      USART1.CR1 := USART.CR1_UE or USART.CR1_RE or USART.CR1_TE;
-      USART1.CR2 := 0;
-      USART1.CR3 := 0;
+      USART1.BRR := Baud_Rate_Register'(DIV_Fraction => Frac_Divider,
+                                       DIV_Mantissa => Int_Divider);
+      --  Must be done in one time, bit to bit does not seem to work
+      USART1.CR1 :=
+        Control_Register_1'
+          (Send_Break                      => False,
+           Receiver_WakeUp                 => False,
+           Receiver_Enable                 => True,
+           Transmitter_Enable              => True,
+           IDLE_Interrupt_Enable           => False,
+           RXNE_Interrupt_Enable           => True,
+           Transmission_Complete_Interrupt => False,
+           TXE_Interrupt_Enable            => False,
+           PE_Interrupt_Enable             => False,
+           Parity_Selection                => ODD,
+           Parity_Control_Enable           => False,
+           WakeUp_Method                   => IDLE_LINE,
+           Length                          => EIGHT_BITS,
+           USART_Enable                    => True,
+           Oversampling_Mode               => OVERSAMPLING_BY_8);
+
    end Initialize_USART1;
 
 begin
