@@ -2,3 +2,5 @@
 *.o
 *.a
 /ravenscar-sfp-stm32f411-nucleo/obj/
+ravenscar-sfp-stm32f411-nucleo/gnatinspect.db
+ravenscar-sfp-stm32f411-nucleo/runtime_build-loc.xml
